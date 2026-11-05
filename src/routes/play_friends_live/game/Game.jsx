@@ -8,13 +8,69 @@ import DiceSection from "./components/DiceSection";
 import StatsSectionMobile from "./components/StatsSectionMobile";
 import CurrentPlayerMobile from "./components/CurrentPlayerMobile";
 import DiceSectionMobile from "./components/DiceSectionMobile";
+import ShieldDecisionModal from "src/components/ShieldDecisionModal";
+
+import {
+  handleShieldDecision,
+} from "src/utils/live_game/luckyShield";
 
 export default function LiveGame() {
-  const { playerData, currentPlayer, isGameOver, setIsContinue } = useLiveGameContext();
+  const {
+  playerData,
+  setPlayerData,
+  currentPlayer,
+  setCurrentPlayer,
+  isGameOver,
+  setIsGameOver,
+  maxPoints,
+  setIsContinue,
+  pendingShieldPlayer,
+  setPendingShieldPlayer,
+} = useLiveGameContext();
 
   useEffect(() => {
     setIsContinue(true)
   }, [])
+
+  
+function resolveShieldDecision(useShield) {
+  if (pendingShieldPlayer === null) return;
+
+  const cp = pendingShieldPlayer;
+
+  try {
+    const result = handleShieldDecision(
+      playerData[cp],
+      useShield
+    );
+
+    const updatedPlayers = [...playerData];
+    updatedPlayers[cp] = result.player;
+
+    setPlayerData(updatedPlayers);
+
+    // Close the decision popup
+    setPendingShieldPlayer(null);
+
+    if (
+      useShield &&
+      result.player.total_points >= maxPoints
+    ) {
+      setIsGameOver(true);
+      return;
+    }
+
+    // Both options end the turn
+    const nextPlayer =
+      (cp + 1) % updatedPlayers.length;
+
+    setCurrentPlayer(nextPlayer);
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+}
+
   
   return (
     <div className="md:grid md:grid-cols-[minmax(auto,_200px)_1fr_minmax(auto,_200px)] lg:grid-cols-[minmax(auto,_250px)_1fr_minmax(auto,_250px)] xl:grid-cols-[auto_1fr_minmax(auto,_300px)] relative">
@@ -32,6 +88,13 @@ export default function LiveGame() {
         <GameOver playerData={playerData} currentPlayer={currentPlayer} setIsContinue={setIsContinue} />
       ) : (
         <></>
+      )}
+      {pendingShieldPlayer !== null && (
+      <ShieldDecisionModal
+        player={playerData[pendingShieldPlayer]}
+        onUseShield={() => resolveShieldDecision(true)}
+        onDecline={() => resolveShieldDecision(false)}
+      />
       )}
     </div>
   );

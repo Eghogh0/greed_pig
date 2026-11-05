@@ -16,6 +16,8 @@ function LiveGamePage() {
   const [isRunning, setIsRunning] = useState("?"); //if the state of the game was still in the running points
   const [diceValue, setDiceValue] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [pendingShieldPlayer, setPendingShieldPlayer] =
+  useState(null);
   
   return (
     <>
@@ -49,7 +51,9 @@ function LiveGamePage() {
             setIsGameOver,
             isGameOver,
             isContinue,
-            setIsContinue
+            setIsContinue,
+            pendingShieldPlayer,
+            setPendingShieldPlayer,
           }}
         >
           <Outlet />
