@@ -1,5 +1,5 @@
 // Supabase
-
+import process from 'node:process';
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_URL;
