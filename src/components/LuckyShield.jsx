@@ -1,5 +1,5 @@
 
-import React from "react";
+import PropTypes from "prop-types";
 
 export default function LuckyShield({ player }) {
   if (!player) return null;
@@ -22,9 +22,7 @@ export default function LuckyShield({ player }) {
           <div
             key={n}
             className={`h-3 flex-1 rounded-full ${
-              n <= streak
-                ? "bg-green-400"
-                : "bg-gray-600"
+              n <= streak ? "bg-green-400" : "bg-gray-600"
             }`}
           />
         ))}
@@ -52,3 +50,10 @@ export default function LuckyShield({ player }) {
     </div>
   );
 }
+
+LuckyShield.propTypes = {
+  player: PropTypes.shape({
+    consecutiveRolls: PropTypes.number,
+    shields: PropTypes.number,
+  }),
+};

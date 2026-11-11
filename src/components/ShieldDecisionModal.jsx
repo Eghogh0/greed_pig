@@ -1,5 +1,5 @@
 
-import React from "react";
+import PropTypes from "prop-types";
 
 export default function ShieldDecisionModal({
   player,
@@ -67,7 +67,7 @@ export default function ShieldDecisionModal({
             onClick={onDecline}
             className="w-full rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/20"
           >
-            Don't Use Shield
+            Don&apos;t Use Shield
           </button>
         </div>
 
@@ -78,3 +78,13 @@ export default function ShieldDecisionModal({
     </div>
   );
 }
+
+ShieldDecisionModal.propTypes = {
+  player: PropTypes.shape({
+    running_points: PropTypes.number,
+    name: PropTypes.string,
+    tag: PropTypes.string,
+  }),
+  onUseShield: PropTypes.func.isRequired,
+  onDecline: PropTypes.func.isRequired,
+};
