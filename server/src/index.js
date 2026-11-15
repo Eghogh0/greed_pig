@@ -204,7 +204,7 @@ app.post(
   // player_name keeps the first player's name so the old frontend keeps working.
   const { data: game, error: gameError } = await supabase
     .from("games")
-    .insert({ player_name: names[0], max_points: maxPoints })
+    .insert({ max_points: maxPoints })
     .select()
     .single();
  
