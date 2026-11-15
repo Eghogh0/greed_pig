@@ -1,14 +1,8 @@
-import { useState } from "react";
 import logo from "../assets/pig-0.png";
 import { Link } from "react-router-dom";
 import FirstTimeOnboarding from "../components/FirstTimeOnboarding";
-import { hasSeenOnboarding } from "../utils/onboarding";
 
 export default function Home() {
-  const [tutorialOpen, setTutorialOpen] = useState(
-    () => !hasSeenOnboarding()
-  );
-
   return (
     <>
       <section className="flex min-h-screen w-full flex-col items-center justify-center">
@@ -38,23 +32,10 @@ export default function Home() {
             >
               Play Friends (Live)
             </Link>
-            <button
-              onClick={() => setTutorialOpen(true)}
-              type="button"
-              className="sec-font flex flex-col items-center gap-1 rounded px-4 py-1 text-sm text-[#F9F7E8]/70 transition hover:text-[#F9F7E8] focus:outline-none focus:ring-2 focus:ring-[#F17BE3]"
-            >
-              <span className="font-bold underline decoration-white/30 underline-offset-4">
-                How to play?
-              </span>
-              <span className="text-xs">Replay the quick guide any time</span>
-            </button>
           </div>
         </div>
       </section>
-      <FirstTimeOnboarding
-        open={tutorialOpen}
-        onClose={() => setTutorialOpen(false)}
-      />
+      <FirstTimeOnboarding />
     </>
   );
 }

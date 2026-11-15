@@ -1,0 +1,94 @@
+/* Animations for the Greedy Pig onboarding guide.
+   Every rule is scoped to .onboarding-* so it cannot affect the rest of
+   the app, and the whole file is imported only by FirstTimeOnboarding.jsx. */
+
+@keyframes onboarding-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes onboarding-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes onboarding-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes onboarding-stage-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes onboarding-replay-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.onboarding-backdrop {
+  animation: onboarding-fade-in 200ms ease-out both;
+}
+
+.onboarding-card {
+  animation: onboarding-card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) 60ms both;
+}
+
+.onboarding-step {
+  animation: onboarding-step-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.onboarding-stage {
+  animation: onboarding-stage-in 320ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both;
+}
+
+.onboarding-replay {
+  animation: onboarding-replay-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Users who prefer reduced motion get none of the above; content still
+   appears instantly because the keyframes only animate in, they never
+   hide the guide. */
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-backdrop,
+  .onboarding-card,
+  .onboarding-step,
+  .onboarding-stage,
+  .onboarding-replay {
+    animation: none;
+  }
+}
