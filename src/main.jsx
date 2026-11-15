@@ -9,6 +9,7 @@ import Home from "./routes/Home";
 import HowToPlay from "./routes/HowToPlay";
 import LiveGame from "./routes/play_friends_live/game/Game";
 import LiveGamePage from "./routes/play_friends_live/LivePage";
+import SavedRooms from "./routes/saved_rooms/SavedRooms";
 
 const router = createBrowserRouter([
   {
@@ -35,10 +36,14 @@ const router = createBrowserRouter([
           },
         ]},
       {
+        path: "saved-rooms/",
+        element: <SavedRooms />,
+      },
+      {
         path: "/",
         element: <Home />,
       },
-    
+
     ],
   },
 ]);
