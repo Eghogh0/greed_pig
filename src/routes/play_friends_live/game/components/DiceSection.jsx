@@ -6,6 +6,12 @@ import addPlayerSound from "src/sound_effect/add_player.mp3";
 import loseSound from "src/sound_effect/lose_sound.mp3";
 import celebrationSound from "src/sound_effect/celebration.mp3";
 import useAudio from "src/hooks/useAudio";
+import LuckyShield from "src/components/LuckyShield";
+
+import {
+  applyLuckyShieldRoll,
+  applyLuckyShieldPass,
+} from "src/utils/live_game/luckyShield";
 
 function DiceSection() {
   const {
@@ -17,25 +23,46 @@ function DiceSection() {
     maxPoints,
     setIsGameOver,
     setDiceValue,
+    pendingShieldPlayer,
+    setPendingShieldPlayer,
   } = useLiveGameContext();
   const [isRolling, setIsRolling] = useState(false);
   const addPlayerAudio = useAudio(addPlayerSound);
   const loseAudio = useAudio(loseSound);
   const celebrationAudio = useAudio(celebrationSound);
+  
+const handlePassClick = (event) => {
+  event.preventDefault();
 
-  const handlePassClick = () => {
-    if (isRolling) return;
-    addPlayerAudio?.play();
-    let cp = currentPlayer;
-    let newPlayerData = [...playerData];
+  if (isRolling || pendingShieldPlayer !== null) {
+    return;
+  }
 
-    newPlayerData[cp]["total_points"] += newPlayerData[cp]["running_points"];
-    newPlayerData[cp]["running_points"] = 0;
-    setPlayerData(newPlayerData);
+  addPlayerAudio?.play();
 
-    cp = (currentPlayer + 1) % playerData.length;
-    setCurrentPlayer(cp);
-  };
+  const updatedPlayers = [...playerData];
+
+  const updatedPlayer = applyLuckyShieldPass(
+    playerData[currentPlayer]
+  );
+
+  updatedPlayers[currentPlayer] = updatedPlayer;
+  setPlayerData(updatedPlayers);
+
+  // A player can also win by banking normally
+  if (updatedPlayer.total_points >= maxPoints) {
+    celebrationAudio?.play();
+    setIsGameOver(true);
+    return;
+  }
+
+  const nextPlayer =
+    (currentPlayer + 1) % playerData.length;
+
+  setCurrentPlayer(nextPlayer);
+};
+
+
 
   function setGameOverPage(
     diceValue,
@@ -65,45 +92,74 @@ function DiceSection() {
     }
   }
 
-  function handleFinalDiceValue(diceValue) {
-    let cp = currentPlayer;
-    let newPlayerData = [...playerData];
+  
 
-    if (diceValue === 1) {
-      loseAudio?.play();
-      newPlayerData[cp]["running_points"] = 0;
-      cp = (currentPlayer + 1) % playerData.length;
-      setCurrentPlayer(cp);
-      setDiceValue(diceValue)
-    } else {
-      setGameOverPage(
-        diceValue,
-        playerData,
-        currentPlayer,
-        maxPoints,
-        setIsGameOver,
-        celebrationAudio
-      );
-      newPlayerData[cp]["running_points"] += diceValue;
-      setPlayerData(newPlayerData);
-      setDiceValue(diceValue)
+function handleFinalDiceValue(diceValue) {
+  // Do not allow another roll during a decision
+  if (pendingShieldPlayer !== null) return;
+
+  const cp = currentPlayer;
+
+  const result = applyLuckyShieldRoll(
+    playerData[cp],
+    diceValue
+  );
+
+  const updatedPlayers = [...playerData];
+  updatedPlayers[cp] = result.player;
+
+  setPlayerData(updatedPlayers);
+  setDiceValue(diceValue);
+
+  // Player rolled a 1
+  if (diceValue === 1) {
+    if (result.needsDecision) {
+      // Keep player and points unchanged until choice
+      setPendingShieldPlayer(cp);
+      return;
     }
+
+    // No shield available: normal penalty
+    loseAudio?.play();
+
+    const nextPlayer =
+      (cp + 1) % playerData.length;
+
+    setCurrentPlayer(nextPlayer);
+    return;
   }
+
+  // Player successfully earned a shield
+  if (result.earnedShield) {
+    console.log(
+      "Lucky Shield earned by",
+      result.player.name || result.player.tag
+    );
+  }
+
+  const currentPoints =
+    result.player.total_points +
+    result.player.running_points;
+
+  if (currentPoints >= maxPoints) {
+    celebrationAudio?.play();
+    setIsGameOver(true);
+  }
+}
+
 
   return (
     <div className="h-screen border-r-[#ffffff40] border-r hidden md:flex flex-col items-center justify-around p-8 sticky top-0 bg-[#00000010] ">
       <Dice
         getFinalDiceValue={handleFinalDiceValue}
         setIsRolling={setIsRolling}
-        isRolling={isRolling}
+        isRolling={
+        isRolling || pendingShieldPlayer !== null
+        }
         setChangeBackground={setChangeBackground}
-
-        // setCurrentPlayer={setCurrentPlayer}
-        // currentPlayer={currentPlayer}
-        // playerData={playerData}
-        // setPlayerData={setPlayerData}
-        // maxPoints={maxPoints}
-        // setIsGameOver={setIsGameOver}
+      />
+      <LuckyShield
+        player={playerData[currentPlayer]}
       />
       <a
         href={"#" + (currentPlayer % playerData.length)}
