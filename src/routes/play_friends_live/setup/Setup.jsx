@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "src/components/Navbar";
 import { useLiveGameContext } from "src/context/useLiveGameContext";
 import AddPlayerButton from "./components/AddPlayerButton";
@@ -7,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { getInitialPlayerData } from "src/utils/live_game/getInitialData";
 import SoundSwitch from "src/components/SoundSwitch";
 import { useGreedyPigContext } from "src/context/useGreedyPigContext";
+import FirstTimeOnboarding from "src/components/FirstTimeOnboarding";
+import { hasSeenOnboarding } from "src/utils/onboarding";
 
 function LiveGameSetup() {
   const {
@@ -21,6 +24,9 @@ function LiveGameSetup() {
   } = useLiveGameContext();
   const navigate = useNavigate();
   const { preloadSrcList, pigPetNames } = useGreedyPigContext();
+  const [tutorialOpen, setTutorialOpen] = useState(() =>
+    !hasSeenOnboarding()
+  );
   const pigs = preloadSrcList.filter((pig) => pig.includes("pig"));
 
   function setupPlayers(resume) {
@@ -113,6 +119,10 @@ function LiveGameSetup() {
           </section>
         </div>
       </main>
+      <FirstTimeOnboarding
+        open={tutorialOpen}
+        onClose={() => setTutorialOpen(false)}
+      />
     </>
   );
 }

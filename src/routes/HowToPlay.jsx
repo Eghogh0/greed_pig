@@ -1,10 +1,12 @@
-import React from "react";
+import { useState } from "react";
 import logo from "src/assets/pig-0.png";
 import { AiFillHome } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import BackButton from "src/components/BackButton";
+import FirstTimeOnboarding from "src/components/FirstTimeOnboarding";
 
 export default function HowToPlay() {
+  const [guideOpen, setGuideOpen] = useState(false);
 
   return (
     <div className="p-[5%] flex flex-col relative w-full items-center ">
@@ -22,6 +24,13 @@ export default function HowToPlay() {
         <figure className="">
           <img src={logo} alt="logo" width={400} />
         </figure>
+        <button
+          onClick={() => setGuideOpen(true)}
+          type="button"
+          className="sec-font rounded-lg bg-[#D30CBD] px-8 py-3 text-base font-bold text-white duration-500 transition hover:scale-95 hover:bg-[#ed20d5] focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#111111]"
+        >
+          Watch the interactive guide
+        </button>
         <section className="text-white space-y-4">
           <h1 className="pri-font text-2xl lg:text-4xl">GAME SETUP</h1>
           <section className=" backdrop:blur bg-[#ffffff10] px-8 lg:px-12 py-6 border text-base lg:text-xl rounded-lg">
@@ -81,6 +90,7 @@ export default function HowToPlay() {
           </section>
         </section>
       </div>
+      <FirstTimeOnboarding open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }
