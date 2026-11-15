@@ -1,11 +1,10 @@
 # Greedy Pig - CSC 419 GROUP 5. 
 
-Improvements such as an enhanced onboarding experience,...
-
-Eghogho Esele,...
-
+Improvements such as an enhanced onboarding experience
+Eghogho Esele
 David Nnodu 
-##Lucky Shield (power-up)
+##
+Lucky Shield (power-up)
 
 Roll 5 times in a row without rolling a 1 to earn a Lucky Shield. If you later roll a 1 while holding a shield, you choose: use the shield to bank your turn points instead of losing them, or keep the shield for later. Either choice ends your turn.
 
