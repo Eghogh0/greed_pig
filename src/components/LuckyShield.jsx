@@ -1,10 +1,11 @@
 
-import React from "react";
+import PropTypes from "prop-types";
 
 export default function LuckyShield({ player }) {
   if (!player) return null;
 
-  const streak = player.consecutiveRolls ?? 0;
+  // Server sends consecutive_rolls; the old local game used consecutiveRolls
+  const streak = player.consecutive_rolls ?? player.consecutiveRolls ?? 0;
   const shields = player.shields ?? 0;
 
   return (
@@ -22,9 +23,7 @@ export default function LuckyShield({ player }) {
           <div
             key={n}
             className={`h-3 flex-1 rounded-full ${
-              n <= streak
-                ? "bg-green-400"
-                : "bg-gray-600"
+              n <= streak ? "bg-green-400" : "bg-gray-600"
             }`}
           />
         ))}
@@ -52,3 +51,11 @@ export default function LuckyShield({ player }) {
     </div>
   );
 }
+
+LuckyShield.propTypes = {
+  player: PropTypes.shape({
+    consecutive_rolls: PropTypes.number,
+    consecutiveRolls: PropTypes.number,
+    shields: PropTypes.number,
+  }),
+};

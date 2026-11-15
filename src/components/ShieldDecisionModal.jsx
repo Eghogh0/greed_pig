@@ -1,10 +1,12 @@
 
-import React from "react";
+import PropTypes from "prop-types";
 
 export default function ShieldDecisionModal({
   player,
   onUseShield,
   onDecline,
+  isBusy = false,
+  error = "",
 }) {
   if (!player) return null;
 
@@ -53,21 +55,29 @@ export default function ShieldDecisionModal({
           to save these points?
         </p>
 
+        {error && (
+          <p role="alert" className="mb-4 rounded-lg border border-red-400/50 bg-red-500/20 p-2 text-sm text-red-100">
+            {error}
+          </p>
+        )}
+
         <div className="flex flex-col gap-3">
           <button
             type="button"
             onClick={onUseShield}
-            className="w-full rounded-xl bg-green-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-green-400 active:scale-95"
+            disabled={isBusy}
+            className="w-full rounded-xl bg-green-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-green-400 active:scale-95 disabled:opacity-60"
           >
-            🛡️ Use Shield — Save {points} Points
+            {isBusy ? "Saving..." : `🛡️ Use Shield — Save ${points} Points`}
           </button>
 
           <button
             type="button"
             onClick={onDecline}
-            className="w-full rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/20"
+            disabled={isBusy}
+            className="w-full rounded-xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/20 disabled:opacity-60"
           >
-            Don't Use Shield
+            Don&apos;t Use Shield
           </button>
         </div>
 
@@ -78,3 +88,15 @@ export default function ShieldDecisionModal({
     </div>
   );
 }
+
+ShieldDecisionModal.propTypes = {
+  player: PropTypes.shape({
+    running_points: PropTypes.number,
+    name: PropTypes.string,
+    tag: PropTypes.string,
+  }),
+  onUseShield: PropTypes.func.isRequired,
+  onDecline: PropTypes.func.isRequired,
+  isBusy: PropTypes.bool,
+  error: PropTypes.string,
+};
