@@ -42,4 +42,11 @@ export const api = {
   pass: (gameId, playerId) => post(`/api/games/${gameId}/pass`, { playerId }),
   shieldDecision: (gameId, playerId, useShield) =>
     post(`/api/games/${gameId}/shield/decision`, { playerId, useShield }),
+
+  // Saved Rooms: pause a game with a room code, look it up, and resume it
+  pauseGame: (gameId, playerId) =>
+    post(`/api/games/${gameId}/pause`, { playerId }),
+  getRoom: (code) => request(`/api/rooms/${encodeURIComponent(code)}`),
+  resumeRoom: (code) =>
+    post(`/api/rooms/${encodeURIComponent(code)}/resume`, {}),
 };

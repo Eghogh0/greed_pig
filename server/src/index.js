@@ -6,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import { randomInt } from "node:crypto";
 import { supabase } from "./db.js";
+import { generateRoomCode, normaliseRoomCode } from "./roomCode.js";
 import {
   processShieldRoll,
   resolveShieldDecision,
@@ -400,7 +401,157 @@ app.post(
     });
   })
 );
- 
+ // ---------- Saved Rooms ----------
+
+// Looks up a game id from a room code
+async function findGameIdByRoomCode(code) {
+  const { data, error } = await supabase
+    .from("games")
+    .select("id")
+    .eq("room_code", code)
+    .maybeSingle();
+  return { error, id: data?.id ?? null };
+}
+
+// A. Pause a game and get its room code
+app.post("/api/games/:id/pause", async (req, res) => {
+  const { id } = req.params;
+  const { playerId } = req.body ?? {};
+
+  if (!uuidPattern.test(id)) {
+    return res.status(400).json({ error: "Invalid game id" });
+  }
+  if (typeof playerId !== "string" || !uuidPattern.test(playerId)) {
+    return res.status(400).json({ error: "A valid playerId is required" });
+  }
+
+  const { error, game } = await fetchGame(id);
+  if (error) {
+    console.error("Pause: load failed:", error.message);
+    return res.status(500).json({ error: "Could not load game." });
+  }
+  if (!game) return res.status(404).json({ error: "Game not found" });
+
+  if (!game.players.some((p) => p.id === playerId)) {
+    return res.status(403).json({ error: "That player is not in this game" });
+  }
+  if (game.status === "finished") {
+    return res.status(409).json({ error: "This game has already finished." });
+  }
+  if (game.status === "paused") {
+    return res.json(game); // already saved, so return the same code
+  }
+
+  // Reuse the game's old code if it had one, otherwise make a new one.
+  // If a new code collides with an existing one, the unique index rejects it
+  // (error 23505) and we try again with a fresh code.
+  let code = game.room_code ?? generateRoomCode();
+  let saved = false;
+
+  for (let attempt = 0; attempt < 5 && !saved; attempt++) {
+    const { error: updateError } = await supabase
+      .from("games")
+      .update({
+        status: "paused",
+        room_code: code,
+        paused_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .eq("status", "in_progress");
+
+    if (!updateError) {
+      saved = true;
+    } else if (updateError.code === "23505") {
+      code = generateRoomCode();
+    } else {
+      console.error("Pause failed:", updateError.message);
+      return res.status(500).json({ error: "Could not save the room." });
+    }
+  }
+
+  if (!saved) {
+    return res
+      .status(500)
+      .json({ error: "Could not create a room code. Please try again." });
+  }
+
+  const result = await fetchGame(id);
+  if (!result.game) {
+    return res.status(500).json({ error: "Could not load game." });
+  }
+  res.json(result.game);
+});
+
+// B. Look up a saved room by its code
+app.get("/api/rooms/:code", async (req, res) => {
+  const code = normaliseRoomCode(req.params.code);
+  if (!code) {
+    return res
+      .status(400)
+      .json({ error: "Room codes are 6 letters or numbers." });
+  }
+
+  const found = await findGameIdByRoomCode(code);
+  if (found.error) {
+    console.error("Room lookup failed:", found.error.message);
+    return res.status(500).json({ error: "Could not look up the room." });
+  }
+  if (!found.id) {
+    return res.status(404).json({ error: "No saved room with that code." });
+  }
+
+  const { error, game } = await fetchGame(found.id);
+  if (error || !game) {
+    return res.status(500).json({ error: "Could not load the room." });
+  }
+  res.json(game);
+});
+
+// C. Resume a paused room
+app.post("/api/rooms/:code/resume", async (req, res) => {
+  const code = normaliseRoomCode(req.params.code);
+  if (!code) {
+    return res
+      .status(400)
+      .json({ error: "Room codes are 6 letters or numbers." });
+  }
+
+  const found = await findGameIdByRoomCode(code);
+  if (found.error) {
+    console.error("Resume lookup failed:", found.error.message);
+    return res.status(500).json({ error: "Could not look up the room." });
+  }
+  if (!found.id) {
+    return res.status(404).json({ error: "No saved room with that code." });
+  }
+
+  const current = await fetchGame(found.id);
+  if (!current.game) {
+    return res.status(500).json({ error: "Could not load the room." });
+  }
+  if (current.game.status === "finished") {
+    return res.status(409).json({ error: "This game has already finished." });
+  }
+
+  if (current.game.status === "paused") {
+    const { error: resumeError } = await supabase
+      .from("games")
+      .update({ status: "in_progress", paused_at: null })
+      .eq("id", found.id)
+      .eq("status", "paused");
+
+    if (resumeError) {
+      console.error("Resume failed:", resumeError.message);
+      return res.status(500).json({ error: "Could not resume the room." });
+    }
+  }
+
+  const result = await fetchGame(found.id);
+  if (!result.game) {
+    return res.status(500).json({ error: "Could not load the room." });
+  }
+  res.json(result.game);
+});
 // ---------- Error handling ----------
  
 app.use((req, res) => {
