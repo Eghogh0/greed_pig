@@ -172,10 +172,14 @@ function Stage({ index }) {
 
 export default function FirstTimeOnboarding() {
   const navigate = useNavigate();
-  // The guide shows itself on the first visit; afterwards it stays available
-  // through the "How to play?" button rendered at the bottom of this file.
-  const [isOpen, setIsOpen] = useState(() => !hasSeenOnboarding());
+  // The guide re-surfaces on every visit to the home screen: Greedy Pig is a
+  // pass-and-play game, so anyone at the table may be new to it. It dismisses
+  // in one tap. hasSeenOnboarding() says whether this browser finished the
+  // guide before, and that decides whether the replay button pulses for
+  // attention or stays quiet.
+  const [isOpen, setIsOpen] = useState(true);
   const [stepIndex, setStepIndex] = useState(0);
+  const completed = hasSeenOnboarding();
   const panelRef = useRef(null);
   const lastFocusedRef = useRef(null);
 
@@ -203,10 +207,10 @@ export default function FirstTimeOnboarding() {
     setIsOpen(true);
   }
 
-  // Skip and finish both mark the guide as seen, so we never interrupt
-  // the player again.
+  // Dismissing the guide (Skip or Esc) closes it for this visit only. The
+  // guide re-surfaces on the next home-screen visit, because someone else at
+  // the table may still be new. Only *finishing* the guide records it as done.
   function skipGuide() {
-    saveOnboardingCompletion();
     setIsOpen(false);
   }
 
@@ -273,30 +277,53 @@ export default function FirstTimeOnboarding() {
     }
   }
 
+  // Clicking the darkened area around the card dismisses the guide, like a
+  // familiar modal; clicking anywhere on the card itself never does.
+  function handleBackdropClick(event) {
+    if (panelRef.current && !panelRef.current.contains(event.target)) {
+      skipGuide();
+    }
+  }
+
   if (!isOpen) {
-    // Closed state: a small floating entry point so the guide can be
-    // replayed by anyone sitting at the table.
+    // Closed state: a prominent, gently pulsing "How to play?" button on the
+    // home screen so anyone at the table can replay the guide. The pulse only
+    // shows for people who have not finished the guide yet (`completed` above
+    // reads the localStorage flag), so returning players get a quiet button
+    // instead of a nag.
     return (
-      <button
-        type="button"
-        onClick={openGuide}
-        aria-label="Replay the how-to-play guide"
-        className="onboarding-replay sec-font fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full border border-white/15 bg-[#17131c]/90 py-2 pl-2.5 pr-5 text-sm font-semibold text-white/85 shadow-xl backdrop-blur transition hover:border-[#F17BE3]/60 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#F17BE3]"
-      >
-        <span
-          aria-hidden="true"
-          className="pri-font grid h-7 w-7 place-items-center rounded-full bg-[#D30CBD] text-sm text-white"
+      <div className="onboarding-replay fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
+        <button
+          type="button"
+          onClick={openGuide}
+          aria-label="Replay the how-to-play guide"
+          className={`onboarding-replay-button sec-font relative flex items-center gap-3 rounded-full border py-2.5 pl-4 pr-6 font-bold text-white backdrop-blur transition duration-300 focus:outline-none focus:ring-2 focus:ring-[#F17BE3] focus:ring-offset-2 focus:ring-offset-[#111111] ${
+            completed
+              ? "border-white/25 bg-[#17131c]/90 hover:border-[#F17BE3]/60 hover:bg-[#17131c]"
+              : "onboarding-replay-pulse border-[#F17BE3]/50 bg-[#D30CBD]/90 hover:bg-[#D30CBD]"
+          }`}
         >
-          ?
-        </span>
-        How to play?
-      </button>
+          <span
+            aria-hidden="true"
+            className="pri-font grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#F17BE3] text-lg text-[#17131c]"
+          >
+            ?
+          </span>
+          <span className="text-left leading-tight">
+            <span className="block text-base">How to play?</span>
+            <span className="block text-[11px] font-medium text-white/70">
+              Replay the quick guide
+            </span>
+          </span>
+        </button>
+      </div>
     );
   }
 
   return (
     <div
       className="onboarding-backdrop fixed inset-0 z-50 overflow-y-auto bg-[#0b0711]/90 p-4 backdrop-blur-sm sm:p-6"
+      onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
     >
       <div className="flex min-h-full items-center justify-center py-4">

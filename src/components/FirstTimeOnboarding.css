@@ -80,6 +80,24 @@
   animation: onboarding-replay-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Attention pulse for the "How to play?" button, shown only to players who
+   have not finished the guide yet. A soft expanding ring on a calm 2s
+   cycle: it draws the eye without reading as a cheap marketing bounce. */
+@keyframes onboarding-replay-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 123, 227, 0.45);
+  }
+
+  50% {
+    box-shadow: 0 0 0 14px rgba(241, 123, 227, 0);
+  }
+}
+
+.onboarding-replay-pulse {
+  animation: onboarding-replay-pulse 2s ease-in-out infinite;
+}
+
 /* Users who prefer reduced motion get none of the above; content still
    appears instantly because the keyframes only animate in, they never
    hide the guide. */
@@ -88,7 +106,8 @@
   .onboarding-card,
   .onboarding-step,
   .onboarding-stage,
-  .onboarding-replay {
+  .onboarding-replay,
+  .onboarding-replay-pulse {
     animation: none;
   }
 }
