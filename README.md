@@ -1,6 +1,6 @@
 # Greedy Pig - CSC 419 GROUP 5. 
 
-Improvements such as an enhanced onboarding experience
+Improvements such as an enhanced onboarding experience (click the how to play button at the right corner of the main screen
 Eghogho Esele
 David Nnodu 
 ##
