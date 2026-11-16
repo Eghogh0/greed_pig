@@ -5,7 +5,7 @@ import FirstTimeOnboarding from "../components/FirstTimeOnboarding";
 export default function Home() {
   return (
     <>
-      <section className="flex min-h-screen w-full flex-col items-center justify-center">
+      <section className="flex min-h-screen w-full flex-col items-center justify-center pb-28">
         <figure>
           <img src={logo} alt="Greedy Pig mascot" width={400} />
         </figure>
@@ -31,6 +31,12 @@ export default function Home() {
               className="sec-font skew-x-6 rounded bg-[#d30cbcc0] px-8 py-4 text-xl font-bold duration-500 hover:scale-95 hover:skew-x-0 hover:bg-[#d30cbc]"
             >
               Play Friends (Live)
+            </Link>
+            <Link
+              to="/saved-rooms"
+              className="sec-font -skew-x-6 rounded bg-[#d30cbcc0] px-8 py-4 text-xl font-bold duration-500 hover:scale-95 hover:skew-x-0 hover:bg-[#d30cbc]"
+            >
+              Saved Rooms
             </Link>
           </div>
         </div>

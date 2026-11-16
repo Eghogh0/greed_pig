@@ -292,12 +292,12 @@ export default function FirstTimeOnboarding() {
     // reads the localStorage flag), so returning players get a quiet button
     // instead of a nag.
     return (
-      <div className="onboarding-replay fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
+      <div className="onboarding-replay pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4">
         <button
           type="button"
           onClick={openGuide}
           aria-label="Replay the how-to-play guide"
-          className={`onboarding-replay-button sec-font relative flex items-center gap-3 rounded-full border py-2.5 pl-4 pr-6 font-bold text-white backdrop-blur transition duration-300 focus:outline-none focus:ring-2 focus:ring-[#F17BE3] focus:ring-offset-2 focus:ring-offset-[#111111] ${
+          className={`onboarding-replay-button pointer-events-auto sec-font relative flex items-center gap-3 rounded-full border py-2.5 pl-4 pr-6 font-bold text-white backdrop-blur transition duration-300 focus:outline-none focus:ring-2 focus:ring-[#F17BE3] focus:ring-offset-2 focus:ring-offset-[#111111] ${
             completed
               ? "border-white/25 bg-[#17131c]/90 hover:border-[#F17BE3]/60 hover:bg-[#17131c]"
               : "onboarding-replay-pulse border-[#F17BE3]/50 bg-[#D30CBD]/90 hover:bg-[#D30CBD]"

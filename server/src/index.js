@@ -96,6 +96,10 @@ async function loadActionContext(req, res) {
     res.status(404).json({ error: "Game not found" });
     return null;
   }
+  if (game.status === "paused") {
+    res.status(409).json({ error: "This game is paused. Resume it from Saved Rooms first." });
+    return null;
+  }
   if (game.status !== "in_progress") {
     res.status(409).json({ error: "Game is already finished" });
     return null;

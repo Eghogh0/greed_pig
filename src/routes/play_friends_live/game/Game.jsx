@@ -9,6 +9,7 @@ import StatsSectionMobile from "./components/StatsSectionMobile";
 import CurrentPlayerMobile from "./components/CurrentPlayerMobile";
 import DiceSectionMobile from "./components/DiceSectionMobile";
 import ShieldDecisionModal from "src/components/ShieldDecisionModal";
+import PauseRoomButton from "src/components/PauseRoomButton";
 
 import useServerGameActions from "src/hooks/useServerGameActions";
 
@@ -33,6 +34,7 @@ export default function LiveGame() {
       <DiceSection />
       <div className=" space-y-2 p-2">
         <Navbar />
+        <PauseRoomButton />
         <PlayerTable playerData={playerData} currentPlayer={currentPlayer} />
       </div>
       <CurrentPlayerMobile playerData={playerData} currentPlayer={currentPlayer}/>

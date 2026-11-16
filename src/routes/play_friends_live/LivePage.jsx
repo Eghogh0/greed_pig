@@ -1,24 +1,39 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useGreedyPigContext } from "src/context/useGreedyPigContext";
 import { LiveGameContext } from "src/context/useLiveGameContext";
 import { getInitialPlayerData } from "src/utils/live_game/getInitialData";
+import { playersFromSavedRoom } from "src/utils/live_game/serverGame";
 
 function LiveGamePage() {
   const { preloadSrcList,pigPetNames } = useGreedyPigContext();
-  const [playerData, setPlayerData] = useState(getInitialPlayerData(preloadSrcList.slice(0,9),pigPetNames));
-  const [maxPoints, setMaxPoints] = useState(100);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Saved Rooms: if we came here from a resumed room, start from that game
+  const savedRoom = location.state?.savedRoom ?? null;
+  const [resumed] = useState(() =>
+    savedRoom ? playersFromSavedRoom(savedRoom, preloadSrcList.slice(0, 9), pigPetNames) : null
+  );
+
+  const [playerData, setPlayerData] = useState(() => resumed ? resumed.players : getInitialPlayerData(preloadSrcList.slice(0,9),pigPetNames));
+  const [maxPoints, setMaxPoints] = useState(savedRoom?.max_points ?? 100);
   const [gameHistory, setGameHistory] = useState([]);
   const [numberRolled, setNumberRolled] = useState(0);
   const [changeBackground, setChangeBackground] = useState(false); //if the state of the game was still in the running points
   const [isGameOver, setIsGameOver] = useState(false); 
-  const [isContinue, setIsContinue] = useState(false); 
+  const [isContinue, setIsContinue] = useState(Boolean(resumed)); 
   const [isRunning, setIsRunning] = useState("?"); //if the state of the game was still in the running points
   const [diceValue, setDiceValue] = useState(0);
-  const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [currentPlayer, setCurrentPlayer] = useState(resumed?.currentPlayer ?? 0);
   const [pendingShieldPlayer, setPendingShieldPlayer] =
-  useState(null);
-  const [gameId, setGameId] = useState(null); // id of the game saved on the server
+  useState(resumed?.pendingShieldPlayer ?? null);
+  const [gameId, setGameId] = useState(savedRoom?.id ?? null); // id of the game saved on the server
+
+  // Clear the saved room from the browser history, so a page refresh doesn't load old scores
+  useEffect(() => {
+    if (savedRoom) navigate(location.pathname, { replace: true, state: null });
+  }, []);
   
   return (
     <>

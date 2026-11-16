@@ -29,3 +29,21 @@ export function applyServerGame(screenPlayers, game) {
     isGameOver: game.status === "finished",
   };
 }
+
+// Saved Rooms: builds the screen players for a game loaded from a room code.
+// Avatars are not stored on the server, so each seat gets the default pig for that seat.
+export function playersFromSavedRoom(game, pigs, pigNames) {
+  const screenPlayers = game.players.map((serverPlayer, index) => ({
+    id: serverPlayer.id,
+    avatar: pigs[index % pigs.length],
+    tag: pigNames[index % pigNames.length],
+    name: serverPlayer.player_name,
+    pig_index: index % pigs.length,
+    running_points: 0,
+    total_points: 0,
+    consecutiveRolls: 0,
+    shields: 0,
+    pendingShieldDecision: false,
+  }));
+  return applyServerGame(screenPlayers, game);
+}

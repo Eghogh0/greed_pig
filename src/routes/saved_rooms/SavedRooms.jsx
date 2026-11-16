@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
 
 export default function SavedRooms() {
@@ -7,6 +8,12 @@ export default function SavedRooms() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resumed, setResumed] = useState(false);
+  const navigate = useNavigate();
+
+  // Opens the game screen with this room's players, scores and turn
+  function continuePlaying(game) {
+    navigate("/live-game/game", { state: { savedRoom: game } });
+  }
 
   const cleanCode = code.trim().toUpperCase();
   const codeLooksValid = /^[A-Z0-9]{6}$/.test(cleanCode);
@@ -36,8 +43,10 @@ export default function SavedRooms() {
     setError("");
     setLoading(true);
     try {
-      setRoom(await api.resumeRoom(cleanCode));
+      const game = await api.resumeRoom(cleanCode);
+      setRoom(game);
       setResumed(true);
+      continuePlaying(game);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -97,6 +106,15 @@ export default function SavedRooms() {
               Resume game
             </button>
           )}
+          {room.status === "in_progress" && (
+            <button
+              onClick={() => continuePlaying(room)}
+              className="rounded bg-black px-4 py-2 text-white"
+            >
+              Continue playing
+            </button>
+          )}
+          {room.status === "finished" && <p>This game has already finished.</p>}
           {resumed && <p>Game resumed.</p>}
         </div>
       )}
