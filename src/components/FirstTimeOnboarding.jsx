@@ -177,9 +177,9 @@ export default function FirstTimeOnboarding() {
   // in one tap. hasSeenOnboarding() says whether this browser finished the
   // guide before, and that decides whether the replay button pulses for
   // attention or stays quiet.
-  const [isOpen, setIsOpen] = useState(true);
   const [stepIndex, setStepIndex] = useState(0);
   const completed = hasSeenOnboarding();
+  const [isOpen, setIsOpen] = useState(!completed);
   const panelRef = useRef(null);
   const lastFocusedRef = useRef(null);
 
